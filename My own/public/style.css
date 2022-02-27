@@ -1,0 +1,9 @@
+.outLine {
+  border: 1px solid red;
+}
+
+tr {
+  display: table-row;
+  vertical-align: inherit;
+  border-color: inherit;
+}
