@@ -49,7 +49,7 @@ function logOut(){
 
 
 function googleLogIn() {
-    var provider = new firebase.auth.GoogleAuthProvider();
+    let provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope("https://www.googleapis.com/auth/plus.login");
     provider.setCustomParameters({
         prompt: "select_account"
@@ -60,14 +60,14 @@ function googleLogIn() {
             .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .then(() => {
                 // This gives you a Google Access Token. You can use it to access the Google API.
-                var token = result.credential.accessToken;
+                let token = result.credential.accessToken;
                 // The signed-in user info.
-                var user = result.user;
+                let user = result.user;
             })
             .catch(function (error) {// Handle Errors here.
-                var errorCode = error.code;
+                let errorCode = error.code;
                 // The email of the user's account used.
-                var email = error.email;
+                let email = error.email;
             });
     });
 }
@@ -78,10 +78,10 @@ let db = firebase.firestore(); // firestore DB 불러오는 코드 규칙설정 
 
 //데이터 기록
 function onAddRecord() {
-    var _no = 2; // 번호 자동생성하는거 알면 좋을듯
-    var _title = $("#exampleInputTitle").val();
-    var _name = $("#exampleInputName").val();
-    var _date = new Date();
+    let _no = 2; // 번호 자동생성하는거 알면 좋을듯
+    let _title = $("#exampleInputTitle").val();
+    let _name = $("#exampleInputName").val();
+    let _date = new Date();
 
 
     db.collection("bbs").add({
@@ -90,40 +90,39 @@ function onAddRecord() {
         제목: _title,
         작성일 : _date
     })
-        .then((docRef) => {
+    .then((docRef) => {
+        let _str = "<tr>";
+        _str += "<td>" + _no + "</td>";
+        _str += "<td>" + _title + "</td>";
+        _str += "<td>" + _name + "</td>";
+        _str += "<td>" + _date + "</td></tr>";
+        $("#tblData").append(_str)
 
-            var _str = "<tr>";
-            _str += "<td>" + _no + "</td>";
-            _str += "<td>" + _title + "</td>";
-            _str += "<td>" + _name + "</td>";
-            _str += "<td>" + _date + "</td></tr>";
-            $("#tblData").append(_str)
-
-            $("#exampleInputTitle").val("");
-            $("#exampleInputName").val("");
-        })
-        .catch((error) => {
-            console.error("Error adding document: ", error);
-        });
+        $("#exampleInputTitle").val("");
+        $("#exampleInputName").val("");
+    })
+    .catch((error) => {
+        console.error("Error adding document: ", error);
+    });
 }
 
 
 
 //데이터 불러오기
 
-var _allBbs = [];
+let _allBbs = [];
 function onLoadData() {
-    $("#tblData").empty();
-    db.collection("bbs")
-        .get()
+    $("#tblData").empty(); // tblData 아이디가지고있는 곳 비우기
+    db.collection("bbs") // firebase 'bbs'컬랙션에서
+        .get() // 데이터 가지고오고
         .then((querySnapshot) => {
             querySnapshot.forEach((doc) => {
-                var _t = {
+                let _t = {
                     id: doc.id,
                     value: doc.data()
                 }
                 _allBbs.push(_t);
-                var _str = '<tr onclick="onSelectData(\'' + doc.id + '\')">';
+                let _str = '<tr onclick="onSelectData(\'' + doc.id + '\')">';
                 _str += "<td>" + doc.data().No + "</td>";
                 _str += "<td>" + doc.data().제목 + "</td>";
                 _str += "<td>" + doc.data().작성자 + "</td>";
@@ -143,7 +142,7 @@ function onLoadData() {
 function onSelectData(id) {
     console.log(id);
 
-    var _item = _allBbs.find(item => item.id == id);
+    let _item = _allBbs.find(item => item.id == id);
 
     console.log(_item)
     if (_item) {
@@ -159,13 +158,13 @@ function onSelectData(id) {
 }
 
 function onUpdateRecord(){
-    var _no = 2; // 번호 자동생성하는거 알면 좋을듯
-    var _title = $("#exampleInputTitle").val();
-    var _name = $("#exampleInputName").val();
-    var _date = new Date();
+    let _no = 2; // 번호 자동생성하는거 알면 좋을듯
+    let _title = $("#exampleInputTitle").val();
+    let _name = $("#exampleInputName").val();
+    let _date = new Date();
     let db = firebase.firestore();
-    var _id = $("#btnUpdate").attr("data-rec-id")
-    var mRef = db.collection('bbs').doc(_id);
+    let _id = $("#btnUpdate").attr("data-rec-id")
+    let mRef = db.collection('bbs').doc(_id);
     mRef
     .update({
         No : _no,
@@ -180,9 +179,9 @@ function onUpdateRecord(){
 
 // 삭제기능
 function onDeleteRecord(){
-    var user = firebase.auth().currentUser;
+    let user = firebase.auth().currentUser;
     if(user){
-        var _id = $("#btnDelete").attr("data-rec-id")
+        let _id = $("#btnDelete").attr("data-rec-id")
         db.collection("bbs").doc(_id).delete().then(() => {
 
             $("#exampleInputTitle").val('');
@@ -204,14 +203,14 @@ function onDeleteRecord(){
 
 
 function getCurrentTime(val) {
-    var t = "";
-    var t1 = new Date(val);
-    var yyyy = t1.getFullYear().toString();
-    var mm = (t1.getMonth() + 1).toString();
-    var dd = t1.getDate().toString();
-    var hh = t1.getHours() < 10 ? "0" + t1.getHours() : t1.getHours();
-    var min = t1.getMinutes() < 10 ? "0" + t1.getMinutes() : t1.getMinutes();
-    var ss = t1.getSeconds() < 10 ? "0" + t1.getSeconds() : t1.getSeconds();
+    let t = "";
+    let t1 = new Date(val);
+    let yyyy = t1.getFullYear().toString();
+    let mm = (t1.getMonth() + 1).toString();
+    let dd = t1.getDate().toString();
+    let hh = t1.getHours() < 10 ? "0" + t1.getHours() : t1.getHours();
+    let min = t1.getMinutes() < 10 ? "0" + t1.getMinutes() : t1.getMinutes();
+    let ss = t1.getSeconds() < 10 ? "0" + t1.getSeconds() : t1.getSeconds();
     t =
         yyyy +
         "/" +

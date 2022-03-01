@@ -1,0 +1,69 @@
+body {
+  display: flex;
+}
+
+nav {
+  border: 1px solid #394249;
+  height: 100vh;
+  width: 20vw;
+  background-color: #394249;
+}
+
+main {
+  border: 1px solid red;
+  height: 100vh;
+  width: 80vw;
+}
+
+.logo {
+  width: 20vw;
+}
+
+.logIn-area {
+  display: flex;
+  justify-content: center;
+}
+
+.logIn-area div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1vh;
+}
+
+.logIn-input {
+  width: 12vw;
+  height: 3vh;
+}
+.logIn-button {
+  width: 7vw;
+  height: 6vh;
+  margin-left: 0.2em;
+}
+
+.input-top {
+  display: flex;
+  position: relative;
+}
+
+.input-inner {
+  display: flex;
+  flex-direction: column;
+  height: 30vh;
+}
+
+.input-inner-writer {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  margin-left: 1em;
+}
+.input-inner-title {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+}
+
+.input-content {
+  height: 70%;
+}
