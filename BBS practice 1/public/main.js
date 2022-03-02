@@ -10,12 +10,49 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore()
 
+
+
 let addTitle = document.getElementById("add_title")
 let addWriter = document.getElementById("add_writer")
 let addContent = document.getElementById("add_content")
 
+
+
 let objectList = []
+let innerTitle = " "
 let innerContents = " "
+
+window.addEventListener('hashchange',router)
+
+function newDetail(){
+  const _id = location.hash.substring(1)
+  db.collection('bbs')
+    .get()
+    .then((response)=>{
+      response.forEach((doc)=>{
+        if(doc.id == _id){
+          innerContents = `<h1>${doc.data().제목}</h1>
+          <div>
+            <a href="#">목록으로</a>
+          </div>`
+          console.log(doc.data().제목)
+          console.log(doc)
+        }
+      })
+      document.getElementById("tblData").innerHTML = innerContents
+    })
+}
+
+function router(){
+  const routePath = location.hash;
+
+  if(routePath === '') {
+    onLoadData()
+  } else{
+    newDetail()
+  }
+}
+router()
 
 function getCurrentTime(val){
   let _t = val
@@ -46,7 +83,7 @@ function addData(){
 }
 
 function onLoadData(){
-  innerContents = ""
+  innerTitle = ""
   db.collection("bbs")
     .get()
     .then((response)=>{
@@ -55,20 +92,19 @@ function onLoadData(){
           id : doc.id,
           others : doc.data()
         })
-        innerContents += `
+        innerTitle += `
         <tr onclick="selectData('${doc.id}')">
           <td>${doc.data().no}</td>
-          <td>${doc.data().제목}</td>
+          <td><a href='#${doc.id}'>${doc.data().제목}</a></td>
           <td>${doc.data().작성자}</td>
           <td>${getCurrentTime(new Date(doc.data().작성일.seconds * 1000))}</td>
         </tr>
         `
       })
-      document.getElementById('tblData').innerHTML = innerContents
+      document.getElementById('tblData').innerHTML = innerTitle
     })
 
 }
-onLoadData()
 
 function selectData(id){
   let _item = objectList.find(item =>item.id == id)
@@ -96,18 +132,18 @@ function deleteData(){
     })
   }
 
-  function updateData(){
-    let _id = $('#updateData').attr('rec-id')
-    db.collection('bbs').doc(_id).update({
-      작성일 : new Date(),
-      작성자 : $("#add_writer").val(),
-      제목 : $("#add_title").val(),
-      내용 : $("#add_title").val()
+function updateData(){
+  let _id = $('#updateData').attr('rec-id')
+  db.collection('bbs').doc(_id).update({
+    작성일 : new Date(),
+    작성자 : $("#add_writer").val(),
+    제목 : $("#add_title").val(),
+    내용 : $("#add_title").val(),
+  })
+    .then(()=>{
+      $("#add_title").val(" ")
+      $("#add_content").val(" ")
+      $("#add_writer").val(" ")
     })
-      .then(()=>{
-        $("#add_title").val(" ")
-        $("#add_content").val(" ")
-        $("#add_writer").val(" ")
-        onLoadData()
-      })
-  }
+  onLoadData()
+}

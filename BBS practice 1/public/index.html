@@ -38,18 +38,22 @@
             <table class="table table-hover text-nowrap">
                 <thead>
                     <tr>
-                        <th>No.</th>
+                        <th><a href ='#'>No.</a></th>
                         <th>제목</th>
                         <th>작성자</th>
                         <th>작성일</th>
                     </tr>
                 </thead>
                 <tbody id="tblData">
-                    
+
                 </tbody>
             </table>
+            <div id="workArea">
+                <a href="#/${store.currentPage - 1}">이전 페이지</a>
+                <a href="#/${store.currentPage + 1}">다음 페이지</a>
+            </div>
         </div>
-        <div>
+        <div >
             <div>
                 <div class="input-top">
                     <div class="input-inner-title">
@@ -71,6 +75,7 @@
                 <button class="btn btn-primary" onclick="updateData()" id="updateData" rec-id =" ">수정</button>
                 <button class="btn btn-primary" onclick="deleteData()" id="deleteData" rec-id =" ">삭제</button>
             </div>
+
         </div>
     </div>
     
