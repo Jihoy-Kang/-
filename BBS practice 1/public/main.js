@@ -22,37 +22,9 @@ let objectList = []
 let innerTitle = " "
 let innerContents = " "
 
-window.addEventListener('hashchange',router)
 
-function newDetail(){
-  const _id = location.hash.substring(1)
-  db.collection('bbs')
-    .get()
-    .then((response)=>{
-      response.forEach((doc)=>{
-        if(doc.id == _id){
-          innerContents = `<h1>${doc.data().제목}</h1>
-          <div>
-            <a href="#">목록으로</a>
-          </div>`
-          console.log(doc.data().제목)
-          console.log(doc)
-        }
-      })
-      document.getElementById("tblData").innerHTML = innerContents
-    })
-}
 
-function router(){
-  const routePath = location.hash;
 
-  if(routePath === '') {
-    onLoadData()
-  } else{
-    newDetail()
-  }
-}
-router()
 
 function getCurrentTime(val){
   let _t = val
@@ -82,6 +54,7 @@ function addData(){
 
 }
 
+
 function onLoadData(){
   innerTitle = ""
   db.collection("bbs")
@@ -90,7 +63,7 @@ function onLoadData(){
       response.forEach((doc)=>{
         objectList.push({
           id : doc.id,
-          others : doc.data()
+          others : doc.data(),
         })
         innerTitle += `
         <tr onclick="selectData('${doc.id}')">
@@ -103,8 +76,8 @@ function onLoadData(){
       })
       document.getElementById('tblData').innerHTML = innerTitle
     })
-
 }
+onLoadData()
 
 function selectData(id){
   let _item = objectList.find(item =>item.id == id)
@@ -145,5 +118,74 @@ function updateData(){
       $("#add_content").val(" ")
       $("#add_writer").val(" ")
     })
-  onLoadData()
+    onLoadData()
 }
+
+//해시체이지 및 페이지 네이션
+const arrTest = [{
+  id : 1,
+  name : 2,},
+  {
+  id : 2,
+  name : {1:3,2:3,}
+  }
+]
+console.log(Array.isArray(objectList))
+console.log(objectList)
+console.log(arrTest)
+function test1(){
+  const result1 = ""
+  for(i = 0; i < 5 ; i++){
+    result1 += `${objectList[i].id}`
+  }
+  document.getElementById('workArea').innerHTML = result1
+}
+
+
+function test2() {
+  db.collection("bbs")
+  .get()
+  .then((response)=>{
+    response.forEach((doc)=>{
+      objectList.push({
+        id : doc.id,
+        others : doc.data(),
+      })
+    })
+    console.log(objectList)
+  })
+}
+
+test2()
+
+window.addEventListener('hashchange',router)
+
+function newDetail(){
+  const _id = location.hash.substring(1)
+  db.collection('bbs')
+    .get()
+    .then((response)=>{
+      response.forEach((doc)=>{
+        if(doc.id == _id){
+          innerContents = `<h1>${doc.data().제목}</h1>
+          <div>
+            <a href="#">목록으로</a>
+          </div>`
+          console.log(doc.data().제목)
+          console.log(doc)
+        }
+      })
+      document.getElementById("tblData").innerHTML = innerContents
+    })
+}
+
+function router(){
+  const routePath = location.hash;
+
+  if(routePath === '') {
+    onLoadData()
+  } else{
+    newDetail()
+  }
+}
+router()
