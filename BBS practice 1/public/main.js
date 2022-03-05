@@ -21,6 +21,11 @@ let addContent = document.getElementById("add_content")
 let objectList = []
 let innerTitle = " "
 let innerContents = " "
+let footerHTML =
+`<div>
+    Copyright 2020ⓒ 제주더큰내일센터. All rights reserved
+</div>`
+
 
 
 
@@ -76,6 +81,7 @@ function onLoadData(){
       })
       document.getElementById('tblData').innerHTML = innerTitle
     })
+  document.getElementById("footer").innerHTML = footerHTML
 }
 onLoadData()
 
@@ -146,7 +152,7 @@ function test2() {
   db.collection("bbs")
   .get()
   .then((response)=>{
-    response.forEach((doc)=>{
+    response.forEach((doc)=>{ 
       objectList.push({
         id : doc.id,
         others : doc.data(),

@@ -41,13 +41,53 @@
         <div class = "titleArea">
             <div><h3>자유게시판</h3></div>
         </div>
-        <div id = "bbs">
+        <div>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="border_bottom bg txt_center">제목</th>
+                        <td class="border_bottom" colspan="5">초등수학 보조 선생님을 모십니다.</td>
+                    </tr>
+                    <tr>
+                        <th class="border_bottom bg txt_center">작성자</th>
+                        <td class="border_bottom">박소희</td>
+                        <th class="border_bottom bg txt_center">작성일</th>
+                        <td class="border_bottom">2022-03-02</td>
+                        <th class="border_bottom bg txt_center">조회수</th>
+                        <td class="border_bottom">43</td>
+                    </tr>
+                    <tr>
+                        <td class="border_bottom board_content" colspan="6">
+                            초등수학 보조 선생님을 모십니다. <br>
+                        <br>
+                        - 위치: 제주시<br>
+                        <br>
+                        - 월급 : 면접 후 협의<br>
+                        <br>
+                        - 시간 :  월-금(3시-6시)<br>
+                        <br>
+                        요일조정은 조율해볼수있어용 ! 010-9909-1172 전화로 문의주세요:)
+                        </td>
+                    </tr> 
+                </tbody>
+            </table>
+            <div class = "mb-3 d-flex justify-content-end">
+                <button class="me-2">수정</button>
+                <button class="me-2">삭제</button>
+                <button class="me-2" onclick="onLoadData()">목록으로</button>
+            </div>
+            <div class="form-floating">
+                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                <label for="floatingTextarea">Comments</label>
+            </div>
+            <div class = "mt-1 d-flex justify-content-end">
+                <button class="me-2">댓글남기기</button>
+            </div>
         </div>
-        <div class="pageArea" id="pageArea">
-            
+        <div>
         </div>
     </main>
-    <footer class="mt-2">
+    <footer>
         <div>
             Copyright 2020ⓒ 제주더큰내일센터. All rights reserved
         </div>

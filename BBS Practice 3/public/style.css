@@ -6,10 +6,10 @@ main {
   height: 80vh;
 }
 
-.btnArea{
-    display: flex;
-    justify-content: end;
-    margin-right: 1em;
+.btnArea {
+  display: flex;
+  justify-content: end;
+  margin-right: 1em;
 }
 footer {
   background-color: darkgrey;
@@ -30,9 +30,10 @@ footer {
   justify-content: center;
 }
 
-
 .pageArea div {
   margin-right: 1em;
 }
 
-.
+.contentsArea {
+  border: 1px solid gray;
+}
