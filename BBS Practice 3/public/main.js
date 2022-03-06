@@ -11,8 +11,7 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore()
 let dataList = []
-let contents =" "
-const store = {
+let store = {
     currentPage : 1,
 }
 
@@ -26,52 +25,54 @@ function getCurrentTime(val){
     let hh = _t.getHours()  < 10 ? '0' + _t.getHours() : _t.getHours()
     let min = _t.getMinutes()  < 10 ? '0' + _t.getMinutes() : _t.getMinutes()
     let sec = _t.getSeconds()  < 10 ? '0' + _t.getSeconds() : _t.getSeconds()
-    return `${yyyy}/${mm}/${dd} ${hh}:${min}:${sec}` // 리턴값이 업스면 undefined으로 돌려줌
+    return `${yyyy}/${mm}/${dd} ${hh}:${min}:${sec}` 
 }
 
-
-function onLoadData(){
-    let contents = ""
-    let pagination = ""
-    contents =`<div class="btnArea">
-    <div><button onclick="writeBtn()">글쓰기</button></div>
-</div>
-<table class="table">
-    <thead>
-        <tr>
-            <th class="col-1">번호</th>
-            <th class="col-6">제목</th>
-            <th class="col-3">작성자</th>
-            <th class="col-2">시간</th>
-        </tr>
-    </thead>
-    <tbody>`
+function getData(cb) {
+    dataList = []
     db.collection('bbs')
         .get()
-        .then((result)=>{
-            result.forEach((doc)=>{
+        .then((response)=>{
+            response.forEach((doc)=>{
                 dataList.push({
                     _id : doc.id,
                     _other : doc.data(),
                 })
-            }) 
+            })
+            cb(dataList)
+        })
+        .catch((error) => {
+            console.log("Error onLoadData documents:", error);
+        })
+}
 
-            for(i = (store.currentPage - 1)*10 ; i < store.currentPage * 10 ; i++){
-                contents += `<tr>
-                <th scope="row">${dataList[i]._other.no}</th>
-                <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
-                <td>${dataList[i]._other.작성자}</td>
-                <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
-                </tr>`
-            }
-            contents += `</tbody>
+function onLoadData(){
+    getData(function(dataList){
+    let contents = []
+    let template = `
+        <div class="btnArea">
+            <div><button onclick="writeBtn()">글쓰기</button></div>
+        </div>
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="col-1">번호</th>
+                        <th class="col-6">제목</th>
+                        <th class="col-3">작성자</th>
+                        <th class="col-2">시간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{__title__List}}
+                </tbody>
             </table>
-        </div>`
-            pagination =` 
+        </div>
+        <div class="pageArea" id="pageArea">
             <div aria-label="Page navigation example">
                 <ul class="pagination">
                     <li class="page-item">
-                        <a class="page-link" href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">
+                        <a class="page-link" href="#/page/{{__prev__page}}">
                         <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -79,25 +80,34 @@ function onLoadData(){
                     <li class="page-item"><a class="page-link" href="#/page/2">2</a></li>
                     <li class="page-item"><a class="page-link" href="#/page/3">3</a></li>
                     <li class="page-item">
-                        <a class="page-link" href="#/page/${store.currentPage + 1}">
+                        <a class="page-link" href="#/page/{{__next__page}}">
                         <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                 </ul>
-            </div>`
-            document.getElementById("bbs").innerHTML = contents
-            document.getElementById("pageArea").innerHTML = pagination
-        })
-        
-        .catch((error) => {
-            console.log("Error onLoadData documents:", error);
-        })        
+            </div>
+        </div>`
+
+    for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
+        contents.push( `<tr>
+        <th scope="row">${dataList[i]._other.no}</th>
+        <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
+        <td>${dataList[i]._other.작성자}</td>
+        <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
+        </tr>`)
+    }
+    
+    template = template.replace('{{__prev__page}}',store.currentPage > 1 ? store.currentPage - 1 : 1)
+    template = template.replace('{{__next__page}}', Math.ceil(dataList.length/10) > store.currentPage ? store.currentPage + 1 : Math.ceil(dataList.length/10))
+    template = template.replace('{{__title__List}}',contents.join(''))
+    document.getElementById("bbs").innerHTML = template
+    })
 }
 
 
+
 function writeBtn(){
-    pagination = ''
-    let writeArea =`
+    let template =`
     <div class="input-group mb-3">
         <span class="input-group-text" id="inputGroup-sizing-default">제목</span>
         <input id="titleBox" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
@@ -108,8 +118,7 @@ function writeBtn(){
     <div class="btnArea">
         <div><button onclick="upLoadBtn()">올리기</button></div>
     </div>`
-    document.getElementById("bbs").innerHTML = writeArea
-    document.getElementById("pageArea").innerHTML = pagination
+    document.getElementById("bbs").innerHTML = template
 }
 
 function upLoadBtn(){
@@ -140,32 +149,31 @@ router()
 
 function loadContent(){
     let contents = ""
-    let pagination = ""
     let contentId = location.hash.substring(7)
     let theItem = dataList.find(doc=>doc._id == contentId)
     
-    contents = `
-    <table class="table">
-                <tbody>
-                    <tr>
-                        <th class="border_bottom bg txt_center">제목</th>
-                        <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
-                    </tr>
-                    <tr>
-                        <th class="border_bottom bg txt_center">작성자</th>
-                        <td class="border_bottom">${theItem._other.작성자}</td>
-                        <th class="border_bottom bg txt_center">작성일</th>
-                        <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
-                        <th class="border_bottom bg txt_center">조회수</th>
-                        <td class="border_bottom">43</td>
-                    </tr>
-                    <tr>
-                        <td class="border_bottom board_content" colspan="6">
-                        ${theItem._other.내용}
-                        </td>
-                    </tr> 
-                </tbody>
-            </table>
+    let template = `
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th class="border_bottom bg txt_center">제목</th>
+                    <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
+                </tr>
+                <tr>
+                    <th class="border_bottom bg txt_center">작성자</th>
+                    <td class="border_bottom">${theItem._other.작성자}</td>
+                    <th class="border_bottom bg txt_center">작성일</th>
+                    <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
+                    <th class="border_bottom bg txt_center">조회수</th>
+                    <td class="border_bottom">43</td>
+                </tr>
+                <tr>
+                    <td class="border_bottom board_content" colspan="6">
+                    ${theItem._other.내용}
+                    </td>
+                </tr> 
+            </tbody>
+        </table>
             <div class = "mb-3 d-flex justify-content-end">
                 <button class="me-2" onclick="updateBtn()">수정</button>
                 <button class="me-2" onclick="deleteBtn()">삭제</button>
@@ -178,26 +186,22 @@ function loadContent(){
             <div class = "mt-1 d-flex justify-content-end">
                 <button class="me-2">댓글남기기</button>
             </div>
-        </div>
-        <div>
     `
-    document.getElementById("bbs").innerHTML = contents
-    document.getElementById("pageArea").innerHTML = pagination
+    document.getElementById("bbs").innerHTML = template
 }
 
 function deleteBtn(){
     let _id = location.hash.substring(7)
     db.collection('bbs').doc(_id).delete()
         .then(()=>{
-            onLoadData()
+            location.href =`#/page/${store.currentPage}`
         })
 }
 
 function updateBtn(){
     let _id = location.hash.substring(7)
     let theItem = dataList.find(doc=>doc._id == _id)
-    pagination = ''
-    let updateArea =`
+    let template =`
         <div class="input-group mb-3">
             <span class="input-group-text" id="inputGroup-sizing-default">제목</span>
             <input id="titleBox" value="${theItem._other.제목}" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
@@ -208,8 +212,7 @@ function updateBtn(){
         <div class="btnArea">
             <div><button onclick="updateBtn2()">수정하기</button></div>
         </div>`
-    document.getElementById("bbs").innerHTML = updateArea
-    document.getElementById("pageArea").innerHTML = pagination
+    document.getElementById("bbs").innerHTML = template
 
     
 }
