@@ -9,6 +9,43 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+$(document).ready(function ($) {
+    firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+            console.log("log in")
+        }
+        else{ 
+            console.log("not log in")
+        }
+    });
+})
+
+function googlelogIn() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope("https://www.googleapis.com/auth/plus.login");
+    provider.setCustomParameters({
+    prompt: "select_account"
+    });
+    firebase.auth().signInWithRedirect(provider).then(function (result) {
+    firebase.auth()
+    .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(() => {
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    var token = result.credential.accessToken;
+    // The signed-in user info.
+    var user = result.user;
+    })
+    .catch(function (error) {// Handle Errors here.
+    var errorCode = error.code;
+    // The email of the user's account used.
+    var email = error.email;
+    });
+    });
+    }
+
+
+
+
 const db = firebase.firestore()
 let dataList = []
 let store = {
@@ -39,6 +76,7 @@ function getData(cb) {
                     _other : doc.data(),
                 })
             })
+            
             cb(dataList)
         })
         .catch((error) => {
@@ -49,6 +87,7 @@ function getData(cb) {
 function onLoadData(){
     getData(function(dataList){
     let contents = []
+    let pagination = []
     let template = `
         <div class="btnArea">
             <div><button onclick="writeBtn()">글쓰기</button></div>
@@ -76,9 +115,7 @@ function onLoadData(){
                         <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
-                    <li class="page-item"><a class="page-link" href="#/page/1">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#/page/2">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#/page/3">3</a></li>
+                    {{__page__}}
                     <li class="page-item">
                         <a class="page-link" href="#/page/{{__next__page}}">
                         <span aria-hidden="true">&raquo;</span>
@@ -88,6 +125,11 @@ function onLoadData(){
             </div>
         </div>`
 
+        dataList.sort(function(a,b){
+            return b._other.no - a._other.no;
+        })
+        
+    
     for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
         contents.push( `<tr>
         <th scope="row">${dataList[i]._other.no}</th>
@@ -96,8 +138,16 @@ function onLoadData(){
         <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
         </tr>`)
     }
-    
+
+    for(j = 0 ; j < Math.ceil(dataList.length/10) ; j++){
+
+        pagination.push(`
+        <li class="page-item"><a class="page-link" href="#/page/${j+1}">${j+1}</a></li>
+        `)
+    }
+        
     template = template.replace('{{__prev__page}}',store.currentPage > 1 ? store.currentPage - 1 : 1)
+    template = template.replace('{{__page__}}', pagination.join(''))
     template = template.replace('{{__next__page}}', Math.ceil(dataList.length/10) > store.currentPage ? store.currentPage + 1 : Math.ceil(dataList.length/10))
     template = template.replace('{{__title__List}}',contents.join(''))
     document.getElementById("bbs").innerHTML = template
@@ -122,14 +172,27 @@ function writeBtn(){
 }
 
 function upLoadBtn(){
-    db.collection('bbs').add({
-        no : 1,
-        제목 : $('#titleBox').val(),
-        내용 : $('#exampleFormControlTextarea1').val(),
-        작성일 : new Date(),
-        작성자 : 'User',
-    })
-    onLoadData()
+    let number = 0
+    db.collection('no')
+        .get()
+        .then((response)=>{response.forEach((doc)=>{
+            number = doc.data().no
+
+            db.collection('no').doc('no')
+                .update({
+                no : number + 1
+                })
+
+                db.collection('bbs').add({
+                    no : number + 1,
+                    제목 : $('#titleBox').val(),
+                    내용 : $('#exampleFormControlTextarea1').val(),
+                    작성일 : new Date(),
+                    작성자 : 'User',
+                })
+        })
+        onLoadData()
+        })
 }
 
 window.addEventListener('hashchange', router)
@@ -148,46 +211,52 @@ function router(){
 router()
 
 function loadContent(){
-    let contents = ""
-    let contentId = location.hash.substring(7)
-    let theItem = dataList.find(doc=>doc._id == contentId)
-    
-    let template = `
-        <table class="table">
-            <tbody>
-                <tr>
-                    <th class="border_bottom bg txt_center">제목</th>
-                    <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
-                </tr>
-                <tr>
-                    <th class="border_bottom bg txt_center">작성자</th>
-                    <td class="border_bottom">${theItem._other.작성자}</td>
-                    <th class="border_bottom bg txt_center">작성일</th>
-                    <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
-                    <th class="border_bottom bg txt_center">조회수</th>
-                    <td class="border_bottom">43</td>
-                </tr>
-                <tr>
-                    <td class="border_bottom board_content" colspan="6">
-                    ${theItem._other.내용}
-                    </td>
-                </tr> 
-            </tbody>
-        </table>
-            <div class = "mb-3 d-flex justify-content-end">
-                <button class="me-2" onclick="updateBtn()">수정</button>
-                <button class="me-2" onclick="deleteBtn()">삭제</button>
-                <button class="me-2" onclick = "location.href ='#/page/${store.currentPage}';">목록으로</button>
-            </div>
-            <div class="form-floating">
-                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
-                <label for="floatingTextarea">Comments</label>
-            </div>
-            <div class = "mt-1 d-flex justify-content-end">
-                <button class="me-2">댓글남기기</button>
-            </div>
-    `
-    document.getElementById("bbs").innerHTML = template
+    getData(function(dataList){
+
+        let contentId = location.hash.substring(7)
+        let theItem = dataList.find(doc=>doc._id == contentId)
+        
+        let template = `
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="border_bottom bg txt_center">제목</th>
+                        <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
+                    </tr>
+                    <tr>
+                        <th class="border_bottom bg txt_center">작성자</th>
+                        <td class="border_bottom">${theItem._other.작성자}</td>
+                        <th class="border_bottom bg txt_center">작성일</th>
+                        <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
+                        <th class="border_bottom bg txt_center">조회수</th>
+                        <td class="border_bottom">43</td>
+                    </tr>
+                    <tr>
+                        <td class="border_bottom board_content" colspan="6">
+                        ${theItem._other.내용}
+                        </td>
+                    </tr> 
+                </tbody>
+            </table>
+                <div class = "mb-3 d-flex justify-content-end">
+                    <button class="me-2" onclick="updateBtn()">수정</button>
+                    <button class="me-2" onclick="deleteBtn()">삭제</button>
+                    <button class="me-2" onclick = "location.href ='#/page/${store.currentPage}';">목록으로</button>
+                </div>
+                <div class="form-floating">
+                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                    <label for="floatingTextarea">Comments</label>
+                </div>
+                <div class = "mt-1 d-flex justify-content-end">
+                    <button class="me-2">댓글남기기</button>
+                </div>
+                <div>
+                
+                </div>
+
+        `
+        document.getElementById("bbs").innerHTML = template
+    })
 }
 
 function deleteBtn(){
@@ -220,17 +289,19 @@ function updateBtn(){
 function updateBtn2(){
     let _id = location.hash.substring(7)
     db.collection('bbs').doc(_id).update({
-        no : 1,
         제목 : $('#titleBox').val(),
         내용 : $('#exampleFormControlTextarea1').val(),
         작성일 : new Date(),
         작성자 : 'User',
     })
-    onLoadData()
+        .then(()=>{
+            onLoadData()
+        })
+    
 }
 
 
 //추가사항
-//1. 페이지네이션
 //2. 로그인
 //3. 로그인 사용자
+//4. 댓글기능 추가
