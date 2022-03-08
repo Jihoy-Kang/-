@@ -1,4 +1,4 @@
-const firebaseConfig = {
+let firebaseConfig = {
     apiKey: "AIzaSyDfvN2kZo41BNoej8GWNeVVtl6R6we1a9Y",
     authDomain: "bbs-practice-1.firebaseapp.com",
     projectId: "bbs-practice-1",
@@ -9,18 +9,32 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+
+
 $(document).ready(function ($) {
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            console.log("log in")
+            console.log(user)
+            $("#profile").css("display","block");
+            $("#profile_image").attr("src",user.photoURL);
+            $("#profile_info").css("display","block")
+            $("#navbarDropdown").text(user.displayName)
+            $("#logInBtn").css("display","none")
+            $("#logOutBtn").css("display","block")
         }
         else{ 
             console.log("not log in")
+            $("#profile").css("display","none");
+            $("#profile_image").attr("src","");
+            $("#profile_info").css("display","none")
+            $("#navbarDropdown").text("")
+            $("#logInBtn").css("display","block")
+            $("#logOutBtn").css("display","none")
         }
     });
 })
 
-function googlelogIn() {
+function googleLogIn() {
     var provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope("https://www.googleapis.com/auth/plus.login");
     provider.setCustomParameters({
@@ -43,7 +57,12 @@ function googlelogIn() {
     });
     }
 
-
+function logOut(){
+    firebase.auth().signOut().then(function () {
+    }, function (error) {
+    //DO
+    });
+}
 
 
 const db = firebase.firestore()
@@ -51,7 +70,6 @@ let dataList = []
 let store = {
     currentPage : 1,
 }
-
 
 
 function getCurrentTime(val){
@@ -188,7 +206,7 @@ function upLoadBtn(){
                     제목 : $('#titleBox').val(),
                     내용 : $('#exampleFormControlTextarea1').val(),
                     작성일 : new Date(),
-                    작성자 : 'User',
+                    작성자 : "us",
                 })
         })
         onLoadData()
@@ -208,7 +226,7 @@ function router(){
         loadContent()
     }
 }
-router()
+
 
 function loadContent(){
     getData(function(dataList){
@@ -295,7 +313,7 @@ function updateBtn2(){
         작성자 : 'User',
     })
         .then(()=>{
-            onLoadData()
+            loadContent()
         })
     
 }

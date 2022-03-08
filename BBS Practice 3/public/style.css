@@ -37,3 +37,13 @@ footer {
 .contentsArea {
   border: 1px solid gray;
 }
+
+#profile_image {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  margin: 0 5px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
