@@ -1,0 +1,79 @@
+.form-control {
+  width: 100%;
+}
+
+.login-main_flexbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.login-main {
+  background-image: url("./image/login_main.jpg");
+  background-size: cover;
+  position: relative;
+}
+
+.login-main::before {
+  content: "";
+  opacity: 0.5;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: #000;
+}
+
+.container {
+  height: 100vh;
+}
+
+.reg-btn-area {
+  display: flex;
+  justify-content: end;
+}
+
+.reg-btn-area button {
+  width: 100%;
+}
+
+.navbar-brand img {
+  height: 10vh;
+}
+
+footer {
+  background-color: darkgrey;
+  color: white;
+  height: 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#profile_image {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  margin: 0 5px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+main {
+  height: 100%;
+}
+
+.titleArea {
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.border {
+  border: 1px solid red;
+  text-align: end;
+}

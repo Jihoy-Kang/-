@@ -14,7 +14,8 @@ firebase.initializeApp(firebaseConfig);
 $(document).ready(function ($) {
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            console.log(user)
+            console.log(JSON.stringify(user))
+            localStorage.setItem('user', JSON.stringify(user))
             $("#profile").css("display","block");
             $("#profile_image").attr("src",user.photoURL);
             $("#profile_info").css("display","block")
@@ -48,6 +49,7 @@ function googleLogIn() {
     var token = result.credential.accessToken;
     // The signed-in user info.
     var user = result.user;
+        console.log(user)
     })
     .catch(function (error) {// Handle Errors here.
     var errorCode = error.code;
@@ -201,13 +203,14 @@ function upLoadBtn(){
                 no : number + 1
                 })
 
-                db.collection('bbs').add({
-                    no : number + 1,
-                    제목 : $('#titleBox').val(),
-                    내용 : $('#exampleFormControlTextarea1').val(),
-                    작성일 : new Date(),
-                    작성자 : "us",
-                })
+            db.collection('bbs').add({
+                no : number + 1,
+                제목 : $('#titleBox').val(),
+                내용 : $('#exampleFormControlTextarea1').val(),
+                작성일 : new Date(),
+                작성자 : JSON.parse(localStorage.user).displayName,
+                uid : JSON.parse(localStorage.user).uid,
+            })
         })
         onLoadData()
         })
@@ -227,7 +230,7 @@ function router(){
     }
 }
 
-
+router()
 function loadContent(){
     getData(function(dataList){
 
@@ -310,7 +313,7 @@ function updateBtn2(){
         제목 : $('#titleBox').val(),
         내용 : $('#exampleFormControlTextarea1').val(),
         작성일 : new Date(),
-        작성자 : 'User',
+        작성자 : JSON.parse(localStorage.user).displayName,
     })
         .then(()=>{
             loadContent()
