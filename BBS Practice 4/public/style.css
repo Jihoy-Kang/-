@@ -91,3 +91,43 @@ main {
   display: flex;
   align-items: center;
 }
+
+.container-fluid img {
+  height: 10vh;
+}
+
+main {
+  height: 100%;
+}
+
+.btnArea {
+  display: flex;
+  justify-content: end;
+  margin-right: 1em;
+}
+footer {
+  background-color: darkgrey;
+  color: white;
+  height: 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.titleArea {
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.pageArea {
+  display: flex;
+  justify-content: center;
+}
+
+.pageArea div {
+  margin-right: 1em;
+}
+
+.contentsArea {
+  border: 1px solid gray;
+}

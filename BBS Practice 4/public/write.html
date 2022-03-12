@@ -55,43 +55,7 @@
             <div><h3>자유게시판</h3></div>
         </div>
         <div id = "bbs">
-            <div class="btnArea">
-                <div><button id="writeBtn">글쓰기</button></div>
-            </div>
-            <div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="col-1">번호</th>
-                            <th class="col-6">제목</th>
-                            <th class="col-3">작성자</th>
-                            <th class="col-2">시간</th>
-                        </tr>
-                    </thead>
-                    <tbody id ='content_list'>
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="pageArea" id="pageArea">
-                <div aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__prev__page}}">
-                            <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        {{__page__}}
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__next__page}}">
-                            <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
-
     </main>
     <footer class="mt-2">
         <div>
@@ -107,18 +71,16 @@
     <script src="https://kit.fontawesome.com/dab690a483.js" crossorigin="anonymous"></script>
     <script src="main.js"></script>
     <script>
-        let dataList = []
-        let contents = []
-        let pagination = []
-        let store = {
-            currentPage : 1,
-        }
 
+        $('#logout').click(function(){
+            firebase.auth().signOut()
+        })
 
         $(document).ready(function ($) {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
                     let _user = JSON.parse(JSON.stringify(user))
+                    console.log(_user)
                     $('#user_info').css('display','block')
                     $('#user_info2').css('display','none')
                     $('#profile_image').attr("src",_user.photoURL !== null ? _user.photoURL : './image/login_main.jpg') // 
@@ -129,54 +91,11 @@
                     $('#user_info2').css('display','block')
                 }
             })
-
-            db.collection('bbs').get()
-                .then((result)=>{result.forEach((doc)=>{
-                    dataList.push({
-                        _id : doc.id,
-                        _other : doc.data(),
-                    })
-                })
-
-                console.log(dataList)
-
-                for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
-                    contents.push( `<tr>
-                    <th scope="row">${dataList[i]._other.no}</th>
-                    <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
-                    <td>${dataList[i]._other.작성자}</td>
-                    <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
-                    </tr>`)
-                }
-
-                for(j = 0 ; j < Math.ceil(dataList.length/10) ; j++){
-                    pagination.push(`
-                    <li class="page-item"><a class="page-link" href="#/page/${j+1}">${j+1}</a></li>
-                    `)
-                    }
-
-                document.getElementById('content_list').innerHTML = contents
-                document.body.innerHTML = document.body.innerHTML.replace('{{__page__}}', pagination)
-                })
-                .catch((error) => {
-                    console.log("Error onLoadData documents:", error);
-                })
-                
         })
 
-        //로그인 기능
         $('#go_login').click(function(){
             window.location.href='/login.html'
         })
-
-        $('#logout').click(function(){
-            firebase.auth().signOut()
-        })
-
-        $('#writeBtn').click(function(){
-            window.location.href='/write.html'
-        })
-        
     </script>
 </body>
 </html>

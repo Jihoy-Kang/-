@@ -12,9 +12,6 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 const storage = firebase.storage();
-let store = {
-  currentPage : 1,
-}
 
 function getCurrentTime(val){
   let _t = val
