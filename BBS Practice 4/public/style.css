@@ -30,6 +30,10 @@
   height: 100vh;
 }
 
+#google-btn {
+  width: 100%;
+}
+
 .reg-btn-area {
   display: flex;
   justify-content: end;
@@ -76,4 +80,14 @@ main {
 .border {
   border: 1px solid red;
   text-align: end;
+}
+
+.navbar-flex {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
 }
