@@ -72,10 +72,6 @@
     <script src="main.js"></script>
     <script>
 
-        $('#logout').click(function(){
-            firebase.auth().signOut()
-        })
-
         $(document).ready(function ($) {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
@@ -93,9 +89,16 @@
             })
         })
 
-        $('#go_login').click(function(){
+                //btn 기능
+
+        $(document).on('click','#go_login',function(){
             window.location.href='/login.html'
         })
+
+        $(document).on('click','#logout',function(){
+            firebase.auth().signOut()
+        })
+
     </script>
 </body>
 </html>

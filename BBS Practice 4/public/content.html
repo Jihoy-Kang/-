@@ -54,44 +54,44 @@
         <div class = "titleArea">
             <div><h3>자유게시판</h3></div>
         </div>
-        <div id = "bbs">
-            <div class="btnArea">
-                <div><button id="writeBtn">글쓰기</button></div>
-            </div>
-            <div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="col-1">번호</th>
-                            <th class="col-6">제목</th>
-                            <th class="col-3">작성자</th>
-                            <th class="col-2">시간</th>
-                        </tr>
-                    </thead>
-                    <tbody id ='content_list'>
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="pageArea" id="pageArea">
-                <div aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__prev__page}}">
-                            <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        {{__page__}}
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__next__page}}">
-                            <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
+        <div>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="border_bottom bg txt_center">제목</th>
+                        <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
+                    </tr>
+                    <tr>
+                        <th class="border_bottom bg txt_center">작성자</th>
+                        <td class="border_bottom">${theItem._other.작성자}</td>
+                        <th class="border_bottom bg txt_center">작성일</th>
+                        <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
+                        <th class="border_bottom bg txt_center">조회수</th>
+                        <td class="border_bottom">43</td>
+                    </tr>
+                    <tr>
+                        <td class="border_bottom board_content" colspan="6">
+                        ${theItem._other.내용}
+                        </td>
+                    </tr> 
+                </tbody>
+            </table>
+                <div class = "mb-3 d-flex justify-content-end">
+                    <button class="me-2" onclick="updateBtn()">수정</button>
+                    <button class="me-2" onclick="deleteBtn()">삭제</button>
+                    <button class="me-2" onclick = "location.href ='#/page/${store.currentPage}';">목록으로</button>
                 </div>
-            </div>
+                <div class="form-floating">
+                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                    <label for="floatingTextarea">Comments</label>
+                </div>
+                <div class = "mt-1 d-flex justify-content-end">
+                    <button class="me-2">댓글남기기</button>
+                </div>
+                <div>
+                
+                </div>
         </div>
-
     </main>
     <footer class="mt-2">
         <div>
@@ -108,14 +108,8 @@
     <script src="main.js"></script>
     <script>
         let dataList = []
-        let contents = []
-        let pagination = []
-        let store = {
-            currentPage : 1,
-        }
 
-        //onload 기능
-        $(function () {
+        $(document).ready(function ($) {
             firebase.auth().onAuthStateChanged(function (user) {
                 if (user) {
                     let _user = JSON.parse(JSON.stringify(user))
@@ -129,42 +123,11 @@
                     $('#user_info2').css('display','block')
                 }
             })
-            contents = []
-            db.collection('bbs').get()
-                .then((result)=>{result.forEach((doc)=>{
-                    dataList.push({
-                        _id : doc.id,
-                        _other : doc.data(),
-                    })
-                })
-                
-                for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
-                    contents.push( `<tr>
-                    <th scope="row">${dataList[i]._other.no}</th>
-                    <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
-                    <td>${dataList[i]._other.작성자}</td>
-                    <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
-                    </tr>`)
-                }
 
-                for(j = 0 ; j < Math.ceil(dataList.length/10) ; j++){
-                    pagination.push(`
-                    <li class="page-item"><a class="page-link" href="#/page/${j+1}">${j+1}</a></li>
-                    `)
-                    }
-
-                document.getElementById('content_list').innerHTML = contents
-                document.body.innerHTML = document.body.innerHTML.replace('{{__prev__page}}',store.currentPage > 1 ? store.currentPage - 1 : 1)
-                document.body.innerHTML = document.body.innerHTML.replace('{{__page__}}', pagination)
-                document.body.innerHTML = document.body.innerHTML.replace('{{__next__page}}', Math.ceil(dataList.length/10) > store.currentPage ? store.currentPage + 1 : Math.ceil(dataList.length/10))
-
-                })
-                .catch((error) => {
-                    console.log("Error onLoadData documents:", error);
-                })
+            console.log(location.hash)
         })
 
-        //btn 기능
+                //btn 기능
 
         $(document).on('click','#go_login',function(){
             window.location.href='/login.html'
@@ -174,13 +137,6 @@
             firebase.auth().signOut()
         })
 
-        $(document).on('click','#writeBtn',function(){
-            window.location.href='/write.html'
-        })
-
-
-
-        
     </script>
 </body>
 </html>
