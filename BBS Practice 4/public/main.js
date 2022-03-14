@@ -26,3 +26,22 @@ function getCurrentTime(val){
 
 
 
+function getData(cb) {
+  dataList = []
+  db.collection('bbs')
+      .get()
+      .then((response)=>{
+          response.forEach((doc)=>{
+              dataList.push({
+                  _id : doc.id,
+                  _other : doc.data(),
+              })
+          })
+          
+          cb(dataList)
+      })
+      .catch((error) => {
+          console.log("Error onLoadData documents:", error);
+      })
+}
+

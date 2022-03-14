@@ -55,41 +55,7 @@
             <div><h3>자유게시판</h3></div>
         </div>
         <div id = "bbs">
-            <div class="btnArea">
-                <div><button id="writeBtn">글쓰기</button></div>
-            </div>
-            <div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="col-1">번호</th>
-                            <th class="col-6">제목</th>
-                            <th class="col-3">작성자</th>
-                            <th class="col-2">시간</th>
-                        </tr>
-                    </thead>
-                    <tbody id ='content_list'>
 
-                    </tbody>
-                </table>
-            </div>
-            <div class="pageArea" id="pageArea">
-                <div aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__prev__page}}">
-                            <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        {{__page__}}
-                        <li class="page-item">
-                            <a class="page-link" href="#/page/{{__next__page}}">
-                            <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
 
     </main>
@@ -129,54 +95,292 @@
                     $('#user_info2').css('display','block')
                 }
             })
-            contents = []
-            db.collection('bbs').get()
-                .then((result)=>{result.forEach((doc)=>{
-                    dataList.push({
-                        _id : doc.id,
-                        _other : doc.data(),
-                    })
+
+            //router
+            router()
+
+        })
+
+        window.addEventListener('hashchange', router)
+
+        function router(){
+            let routePath = location.hash;
+            if (routePath == ''){
+                onLoadData()
+            } else if(routePath.indexOf("page") >= 0){
+                store.currentPage = Number(routePath.substring(7))
+                onLoadData()
+            } else{
+                loadContent()
+            }
+        }
+
+
+        function onLoadData(){
+            getData(function(dataList){
+            let contents = []
+            let pagination = []
+            let template = `
+                <div class="btnArea">
+                    <div><button onclick="writeBtn()">글쓰기</button></div>
+                </div>
+                <div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="col-1">번호</th>
+                                <th class="col-6">제목</th>
+                                <th class="col-3">작성자</th>
+                                <th class="col-2">시간</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{__title__List}}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pageArea" id="pageArea">
+                    <div aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                                <a class="page-link" href="#/page/{{__prev__page}}">
+                                <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {{__page__}}
+                            <li class="page-item">
+                                <a class="page-link" href="#/page/{{__next__page}}">
+                                <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>`
+
+                dataList.sort(function(a,b){
+                    return b._other.no - a._other.no;
                 })
                 
-                for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
-                    contents.push( `<tr>
-                    <th scope="row">${dataList[i]._other.no}</th>
-                    <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
-                    <td>${dataList[i]._other.작성자}</td>
-                    <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
-                    </tr>`)
+            
+            for(i = (store.currentPage - 1)*10 ; i < ((store.currentPage * 10) > dataList.length ? dataList.length :(store.currentPage * 10)) ; i++){
+                contents.push( `<tr id="title_list">
+                <th scope="row">${dataList[i]._other.no}</th>
+                <td><a href="#/show/${dataList[i]._id}">${dataList[i]._other.제목}</a></td>
+                <td>${dataList[i]._other.작성자}</td>
+                <td>${getCurrentTime(new Date(dataList[i]._other.작성일.seconds * 1000))}</td>
+                </tr>`)
+            }
+
+            for(j = 0 ; j < Math.ceil(dataList.length/10) ; j++){
+
+                pagination.push(`
+                <li class="page-item"><a class="page-link" href="#/page/${j+1}">${j+1}</a></li>
+                `)
+            }
+                
+            template = template.replace('{{__prev__page}}',store.currentPage > 1 ? store.currentPage - 1 : 1)
+            template = template.replace('{{__page__}}', pagination.join(''))
+            template = template.replace('{{__next__page}}', Math.ceil(dataList.length/10) > store.currentPage ? store.currentPage + 1 : Math.ceil(dataList.length/10))
+            template = template.replace('{{__title__List}}',contents.join(''))
+            document.getElementById("bbs").innerHTML = template
+            })
+        }
+
+        function writeBtn(){
+            let template =`
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">제목</span>
+                <input id="titleBox" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="mb-3">
+                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            </div>
+            <div class="btnArea">
+                <div><button onclick="upLoadBtn()">올리기</button></div>
+            </div>`
+            document.getElementById("bbs").innerHTML = template
+        }
+
+        function upLoadBtn(){
+            let number = 0
+            let noID = ""
+            db.collection('no').get()
+                .then((result)=>{result.forEach((doc)=>{
+                        number = doc.data().no
+                        noID = doc.id
+
+                    })
+                    db.collection('no').doc(noID).update({
+                        no : number + 1
+                    })
+
+                    db.collection('bbs').add({
+                        no : number + 1,
+                        제목 : $('#titleBox').val(),
+                        내용 : $('#exampleFormControlTextarea1').val(),
+                        작성일 : new Date(),
+                        작성자 : JSON.parse(localStorage.user).displayName,
+                        uid : JSON.parse(localStorage.user).uid,
+                        count : 0,
+                    })
+                    .catch((err)=>{
+                        console.log('에러:',err)
+                    })
+                    onLoadData()
+                })
+        }
+
+        function loadContent(){
+            let contentId = location.hash.substring(7)
+            let userUID = JSON.parse(localStorage.user).uid
+            
+            
+
+            getData(function(dataList){
+                let theItem = dataList.find(doc=>doc._id == contentId)
+                let itemCount = theItem._other.count + 1
+
+                let template = `
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th class="border_bottom bg txt_center">제목</th>
+                                <td class="border_bottom" colspan="5">${theItem._other.제목}</td>
+                            </tr>
+                            <tr>
+                                <th class="border_bottom bg txt_center">작성자</th>
+                                <td class="border_bottom">${theItem._other.작성자}</td>
+                                <th class="border_bottom bg txt_center">작성일</th>
+                                <td class="border_bottom">${getCurrentTime(new Date(theItem._other.작성일.seconds * 1000))}</td>
+                                <th class="border_bottom bg txt_center">조회수</th>
+                                <td class="border_bottom">${itemCount}</td>
+                            </tr>
+                            <tr>
+                                <td class="border_bottom board_content" colspan="6" >
+                                ${theItem._other.내용}
+                                </td>
+                            </tr> 
+                        </tbody>
+                    </table>
+                        <div class = "mb-3 d-flex justify-content-end">
+                            <button class="me-2" onclick="updateBtn()" id="content-update">수정</button>
+                            <button class="me-2" onclick="deleteBtn()" id="content-delete">삭제</button>
+                            <button class="me-2" onclick = "location.href ='#/page/${store.currentPage}';">목록으로</button>
+                        </div>
+                        <div>
+                            댓글(0)
+                        </div>
+                        <div id="comment_area">
+                            <div class="comment_area mt-1 mb-1 d-flex flex-row bd-highlight">
+                                <div class ="d-flex me-3">
+                                    <div class="d-flex align-items-center justify-content-center ">
+                                        <img src="./image/login_main.jpg" id="comment_image">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="d-flex mb-2">
+                                        <div class=" d-flex align-items-end justify-content-center me-3" style="font-size:1.25rem">강지효</div>
+                                        <div class="d-flex align-items-end justify-content-center" style="font-size: 0.75rem">2022년 2월22일</div>    
+                                    </div>
+                                    <div class=" d-flex align-items-end">ddd</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating mb-1">
+                            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+                            <label for="floatingTextarea">Comments</label>
+                        </div>
+                        
+                        <div class = "mt-1 d-flex justify-content-end mb-1">
+                            <button class="me-2" id="comment_btn">댓글남기기</button>
+                        </div>
+                `
+                document.getElementById("bbs").innerHTML = template
+                
+
+                
+
+                if(theItem._other.uid !== userUID){
+                    $('#content-update').css('display',"none")
+                    $('#content-delete').css('display',"none")
                 }
 
-                for(j = 0 ; j < Math.ceil(dataList.length/10) ; j++){
-                    pagination.push(`
-                    <li class="page-item"><a class="page-link" href="#/page/${j+1}">${j+1}</a></li>
-                    `)
-                    }
-
-                document.getElementById('content_list').innerHTML = contents
-                document.body.innerHTML = document.body.innerHTML.replace('{{__prev__page}}',store.currentPage > 1 ? store.currentPage - 1 : 1)
-                document.body.innerHTML = document.body.innerHTML.replace('{{__page__}}', pagination)
-                document.body.innerHTML = document.body.innerHTML.replace('{{__next__page}}', Math.ceil(dataList.length/10) > store.currentPage ? store.currentPage + 1 : Math.ceil(dataList.length/10))
-
+                db.collection('bbs').doc(contentId).update({
+                    count : itemCount,
                 })
-                .catch((error) => {
-                    console.log("Error onLoadData documents:", error);
-                })
-        })
+            })
+        }
+
+
 
         //btn 기능
 
         $(document).on('click','#go_login',function(){
-            window.location.href='/login.html'
+            window.location.href='/auth.html'
         })
 
         $(document).on('click','#logout',function(){
             firebase.auth().signOut()
         })
 
-        $(document).on('click','#writeBtn',function(){
-            window.location.href='/write.html'
+        function deleteBtn(){
+            let _id = location.hash.substring(7)
+            db.collection('bbs').doc(_id).delete()
+                .then(()=>{
+                    location.href =`#/page/${store.currentPage}`
+                })
+        }
+
+        function updateBtn(){
+            let _id = location.hash.substring(7)
+            let theItem = dataList.find(doc=>doc._id == _id)
+            let template =`
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">제목</span>
+                    <input id="titleBox" value="${theItem._other.제목}" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                </div>
+                <div class="mb-3">
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3">${theItem._other.내용}</textarea>
+                </div>
+                <div class="btnArea">
+                    <div><button onclick="updateBtn2()">수정하기</button></div>
+                </div>`
+            document.getElementById("bbs").innerHTML = template
+
+            
+        }
+
+        function updateBtn2(){
+            let _id = location.hash.substring(7)
+            db.collection('bbs').doc(_id).update({
+                제목 : $('#titleBox').val(),
+                내용 : $('#exampleFormControlTextarea1').val(),
+                작성일 : new Date(),
+                작성자 : JSON.parse(localStorage.user).displayName,
+            })
+                .then(()=>{
+                    loadContent()
+                })
+            
+        }
+
+        $('#comment_btn').click(function(){
+
+            db.collection('bbs').doc(_id)
+                .update({
+                    comment : {
+                        comment_내용 : $('#floatingTextarea').val(),
+                        comment_작성일 : new Date(),
+                        comment_작성자 : JSON.parse(localStorage.user).displayName,
+                        comment_uid : JSON.parse(localStorage.user).uid,
+                        }
+                })
+                
+                .then(()=>{
+                    loadContent()
+                })
         })
+
 
 
 
