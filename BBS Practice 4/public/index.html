@@ -52,9 +52,14 @@
     </nav>
     <main>
         <div class = "titleArea">
-            <div><h3>자유게시판</h3></div>
+            <div></div>
         </div>
-        <div id = "bbs">
+        <div id = "bbs" class="index_main">
+            <h3>안녕하세요</h3>
+            <p>탐나는인재 게시판 만들기 팀입니다.</p>
+            <p>지난 6주간 여러가지 어려움이 있었지만 이렇게 완성할 수 있게되었습니다.</p>
+            <p>아직 회원정보 수정이나 댓글기능을 구현하지 못하였지만 앞으로 꾸준히 학습하여 개선해 나가도록하겠습니다. </p>
+            <p>둘러보시고 자유롭게 글 남겨주시면 감사하겠습니다!</p>
         </div>
     </main>
     <footer class="mt-2">
@@ -92,7 +97,7 @@
                 //btn 기능
 
         $(document).on('click','#go_login',function(){
-            window.location.href='/login.html'
+            window.location.href='/auth.html'
         })
 
         $(document).on('click','#logout',function(){

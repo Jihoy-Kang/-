@@ -16,7 +16,7 @@ const storage = firebase.storage();
 function getCurrentTime(val){
   let _t = val
   let yyyy = _t.getFullYear()
-  let mm = _t.getMonth() < 10 ? '0' + _t.getMonth() : _t.getMonth()
+  let mm = Number(_t.getMonth() < 9 ? '0' + _t.getMonth() : _t.getMonth()) + 1
   let dd = _t.getDate() < 10 ? '0' + _t.getDate() : _t.getDate()
   let hh = _t.getHours()  < 10 ? '0' + _t.getHours() : _t.getHours()
   let min = _t.getMinutes()  < 10 ? '0' + _t.getMinutes() : _t.getMinutes()
@@ -45,3 +45,21 @@ function getData(cb) {
       })
 }
 
+function getData2(cb) {
+  dataList = []
+  db.collection('bbs2')
+      .get()
+      .then((response)=>{
+          response.forEach((doc)=>{
+              dataList.push({
+                  _id : doc.id,
+                  _other : doc.data(),
+              })
+          })
+          
+          cb(dataList)
+      })
+      .catch((error) => {
+          console.log("Error onLoadData documents:", error);
+      })
+}
