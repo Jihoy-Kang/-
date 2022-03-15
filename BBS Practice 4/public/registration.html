@@ -40,16 +40,22 @@
             let email = $('#email-new').val()
             let password = $('#pw-new').val()
             let userName = $('#name-new').val()
+            let userDetail = {
+                displayName : userName,
+            }
 
             firebase.auth().createUserWithEmailAndPassword(email, password)
         .then((result)=>{
-            console.log(result)
+            let = result.user
             console.log(result.user)
-            result.user.updateProfile( {displayName : userName} )
+            result.user.updateProfile( userDetail)
             window.location.href = "/auth.html" 
         })
         .catch((err)=>{
-            console.log("에러:",err)
+            let errorCode = error.code;
+            let errorMessage = error.message
+            console.log('에러코드:',errorCode)
+            console.log('에러코드:',errorMessage)
         })
         })
 
